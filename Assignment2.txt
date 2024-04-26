@@ -1,0 +1,80 @@
+import os
+import re
+
+# SCONSTRUCT file interesting lines
+# config.version = Version(
+# major=15,
+# minor=0,
+# point=6,
+# patch=0
+#)
+
+
+def update_sconstruct():
+    "Update the build number in the SConstruct file"
+
+    sconstruct_path = os.path.join(os.environ["SourcePath"], "develop", "global", "src", "SConstruct")
+    temp_path = os.path.join(os.environ["SourcePath"], "develop", "global", "src", "SConstruct_temp")
+
+    # Set the appropriate permissions for the SConstruct file
+    os.chmod(sconstruct_path, 0755)
+
+    # Open and read the original SConstruct file
+    fin = open(sconstruct_path, 'r')
+
+    # Open for write a temp file
+    fout = open(temp_path, 'w')
+
+    # Write the updated lines to a temporary file
+    for sconstruct_lines in fin:
+        sconstruct_lines = re.sub("point\=[\d]+", "point=" + os.environ["BuildNum"], sconstruct_lines)
+        fout.write(sconstruct_lines)
+
+    fin.close()
+    fout.close()
+
+    # Remove the original SConstruct file
+    os.remove(sconstruct_path)
+
+    # Rename the temporary file to the original SConstruct file
+    os.rename(temp_path, sconstruct_path)
+
+
+# VERSION file interesting line
+# ADLMSDK_VERSION_POINT = 6
+
+def update_version():
+    "Update the build number in the VERSION file"
+    version_path = os.path.join(os.environ["SourcePath"], "develop", "global", "src", "VERSION")
+    temp_path = os.path.join(os.environ["SourcePath"], "develop", "global", "src", "TEMP_VERSION")
+
+    # Set the appropriate permissions for the VERSION file
+    os.chmod(version_path, 0755)
+
+    # Open and read the original VERSION file
+    fin = open(version_path, 'r')
+
+    # Open for write a temp file
+    fout = open(temp_path, 'w')
+
+    # Write the updated lines to a temporary file
+    for line in fin:
+        line = re.sub("ADLMSDK_VERSION_POINT=[\d]+", "ADLMSDK_VERSION_POINT=" + os.environ["BuildNum"], line)
+        fout.write(line)
+
+    fin.close()
+    fout.close()
+
+    # Remove the original SConstruct file
+    os.remove(version_path)
+
+    # Rename the temporary file to the original VERSION file
+    os.rename(temp_path, version_path)
+
+
+def main():
+    update_sconstruct()
+    update_version()
+
+
+main()
